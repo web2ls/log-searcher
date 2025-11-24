@@ -1,7 +1,8 @@
 import './App.css'
+import { LogViewerPage } from './components/log-viewer-page'
 
 function App() {
-	return <div>apppppp</div>
+	return <LogViewerPage />
 }
 
 export default App

@@ -1,0 +1,22 @@
+.log-viewer-terminal {
+	flex: 1;
+	height: 100%;
+	width: 100%;
+	box-sizing: border-box;
+	background: #0d0f11;
+	color: #d1d5db;
+	font-family: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', ui-monospace, monospace;
+	font-size: 13px;
+	padding: 1rem;
+	border: 1px solid var(--border);
+	border-radius: 0.5rem;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+	overflow: auto;
+}
+
+.log-viewer-terminal span {
+	display: block;
+	white-space: pre-wrap;
+	line-height: 1.5;
+}
+

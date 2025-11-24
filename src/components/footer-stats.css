@@ -1,0 +1,11 @@
+.log-viewer-footer {
+	height: 48px;
+	padding: 0 1rem;
+	display: flex;
+	align-items: center;
+	background: color-mix(in oklch, var(--background) 95%, var(--foreground) 5%);
+	border-top: 1px solid var(--border);
+	font-size: 0.875rem;
+	color: var(--muted-foreground);
+}
+
