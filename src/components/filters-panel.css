@@ -1,10 +1,11 @@
 .log-viewer-filters {
 	padding: 1rem;
 	border-bottom: 1px solid var(--border);
-	background: color-mix(in oklab, var(--background) 90%, var(--foreground) 10%);
+	background: color-mix(in oklch, var(--background) 70%, var(--card) 30%);
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .log-viewer-filters h2 {
@@ -18,3 +19,18 @@
 	color: var(--muted-foreground);
 }
 
+.filters-panel {
+	display: flex;
+	gap: 20px;
+	align-items: center;
+}
+
+.log-level-filters {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.message-filter {
+	flex-basis: 50%;
+}

@@ -1,9 +1,47 @@
+import { useState } from 'react'
 import './toolbar.css'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
 
-export function Toolbar() {
+interface Props {
+	onToTop: () => void
+	onToBottom: () => void
+	onToLineNumber: (lineNumber: number) => void
+}
+
+export function Toolbar(props: Props) {
+	const { onToTop, onToBottom, onToLineNumber } = props
+
+	const [lineNumber, setLineNumber] = useState<number>(0)
+
+	const handleToLineNumber = () => {
+		onToLineNumber(lineNumber)
+	}
+
 	return (
-		<nav className='log-viewer-toolbar'>
-			<p>Здесь появятся инпуты и кнопки: перейти к строке, шагать вверх/вниз, быстро в начало или конец лога.</p>
-		</nav>
+		<div className='toolbar'>
+			<Button variant='outline' onClick={onToTop}>
+				To the top
+			</Button>
+			<Button variant='outline' onClick={onToBottom}>
+				To the bottom
+			</Button>
+			<div className='line-number-input'>
+				<Input
+					type='number'
+					placeholder='Line number'
+					value={lineNumber}
+					onChange={(event) => setLineNumber(Number(event.target.value))}
+					onKeyDown={(event) => {
+						if (event.key === 'Enter') {
+							handleToLineNumber()
+						}
+					}}
+				/>
+				<Button variant='outline' onClick={handleToLineNumber}>
+					To line number
+				</Button>
+			</div>
+		</div>
 	)
 }

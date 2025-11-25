@@ -1,9 +1,16 @@
 import './footer-stats.css'
 
-export function FooterStats() {
+interface Props {
+	visibleLines: number
+	totalLines: number
+}
+
+export function FooterStats(props: Props) {
+	const { visibleLines, totalLines } = props
+
 	return (
 		<footer className='log-viewer-footer'>
-			<p>Статистика по строкам и активным фильтрам</p>
+			Visible lines: {visibleLines} / {totalLines}
 		</footer>
 	)
 }
