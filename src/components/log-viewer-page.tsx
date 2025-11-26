@@ -1,9 +1,10 @@
+import { filterLogs } from '@/lib/utils'
 import { generateLogs, type LogEntry } from '@/mock/generateLogs'
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { FiltersPanel } from './filters-panel'
 import { FooterStats } from './footer-stats'
 import { Header } from './header'
-import { LogList } from './log-list'
+import { LogList, type LogListAPI } from './log-list'
 import './log-viewer-page.css'
 import { Toolbar } from './toolbar'
 
@@ -15,6 +16,9 @@ export interface Filters {
 		ERROR: boolean
 	}
 }
+
+// keyof Filters
+// K extends keyof Filters -> Filters[K]
 
 const DEFAULT_FILTERS: Filters = {
 	message: '',
@@ -28,10 +32,11 @@ const DEFAULT_FILTERS: Filters = {
 export type UpdateFilterValue = <K extends keyof Filters>(key: K, value: Filters[K]) => void
 
 export function LogViewerPage() {
-	const [logs] = useState<LogEntry[]>(() => generateLogs(100000))
+	const [logs] = useState<LogEntry[]>(() => generateLogs(100))
 	const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
-	const firstItemRef = useRef<HTMLDivElement>(null)
-	const lastItemRef = useRef<HTMLDivElement>(null)
+	const LogListAPIRef = useRef<LogListAPI>(null)
+
+	const filteredLogs = useMemo(() => filterLogs(logs, filters), [logs, filters])
 
 	const handleUpdateFilters = <K extends keyof Filters>(key: K, value: Filters[K]) => {
 		setFilters((prev) => {
@@ -45,45 +50,22 @@ export function LogViewerPage() {
 		setFilters(DEFAULT_FILTERS)
 	}
 
-	const getFilteredLogs = () => {
-		return logs.filter((log) => {
-			if (filters.message.trim() && !log.message.includes(filters.message)) {
-				return false
-			}
-
-			const levels = filters.level
-			const activeLevels = Object.entries(levels)
-				.filter(([, value]) => value)
-				.map(([key]) => key)
-
-			if (activeLevels.length > 0 && !activeLevels.includes(log.level)) {
-				return false
-			}
-
-			return true
-		})
+	const handleScrollToTop = () => {
+		LogListAPIRef.current?.scrollToTop()
 	}
 
-	const handleToTop = () => {
-		firstItemRef.current?.scrollIntoView({ behavior: 'smooth' })
+	const handleScrollToBottom = () => {
+		LogListAPIRef.current?.scrollToBottom()
 	}
 
-	const handleToBottom = () => {
-		lastItemRef.current?.scrollIntoView({ behavior: 'smooth' })
-	}
-
-	const handleToLineNumber = (lineNumber: number) => {
-		if (lineNumber < 1 || lineNumber > logs.length) {
+	const handleScrollToIndex = (lineNumber: number) => {
+		const index = lineNumber - 1
+		if (index < 0 || index >= filteredLogs.length) {
 			return
 		}
 
-		const element = document.getElementById(`log-${lineNumber}`)
-		if (element) {
-			element.scrollIntoView({ behavior: 'smooth' })
-		}
+		LogListAPIRef.current?.scrollToLineNumber(index)
 	}
-
-	const filteredLogs = getFilteredLogs()
 
 	return (
 		<div className='log-viewer-page'>
@@ -93,9 +75,13 @@ export function LogViewerPage() {
 				onUpdateFilterValue={handleUpdateFilters}
 				onResetFilters={handleResetFilters}
 			/>
-			<Toolbar onToTop={handleToTop} onToBottom={handleToBottom} onToLineNumber={handleToLineNumber} />
+			<Toolbar
+				onToTop={handleScrollToTop}
+				onToBottom={handleScrollToBottom}
+				onToLineNumber={handleScrollToIndex}
+			/>
 			<div className='log-viewer-content'>
-				<LogList items={filteredLogs} firstItemRef={firstItemRef} lastItemRef={lastItemRef} />
+				<LogList items={filteredLogs} apiRef={LogListAPIRef} />
 			</div>
 			<FooterStats visibleLines={filteredLogs.length} totalLines={logs.length} />
 		</div>
