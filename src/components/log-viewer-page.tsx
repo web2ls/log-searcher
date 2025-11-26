@@ -28,7 +28,7 @@ const DEFAULT_FILTERS: Filters = {
 export type UpdateFilterValue = <K extends keyof Filters>(key: K, value: Filters[K]) => void
 
 export function LogViewerPage() {
-	const [logs] = useState<LogEntry[]>(() => generateLogs(50))
+	const [logs] = useState<LogEntry[]>(() => generateLogs(100000))
 	const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
 	const firstItemRef = useRef<HTMLDivElement>(null)
 	const lastItemRef = useRef<HTMLDivElement>(null)
