@@ -1,7 +1,7 @@
 import { filterLogs } from '@/lib/utils'
 import { generateLogs, type LogEntry } from '@/mock/generateLogs'
 import debounce from 'lodash.debounce'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FiltersPanel } from './filters-panel'
 import { FooterStats } from './footer-stats'
 import { Header } from './header'
@@ -38,10 +38,9 @@ export function LogViewerPage() {
 	const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
 	const LogListAPIRef = useRef<LogListAPI>(null)
 
-	const filterLogsFn = () => {
-		const newFilteredLogs = filterLogs(logs, filters)
-		setFilteredLogs(newFilteredLogs)
-	}
+	const filterLogsFn = useCallback(() => {
+		setFilteredLogs(filterLogs(logs, filters))
+	}, [logs, filters])
 
 	const filterLogsFnRef = useRef<() => void>(filterLogsFn)
 
@@ -52,15 +51,21 @@ export function LogViewerPage() {
 
 	const debouncedFilterLogs = useMemo(() => {
 		const func = () => {
-			console.log('debounced function is called')
 			filterLogsFnRef.current?.()
 		}
+
 		return debounce(func, 500)
 	}, [])
 
 	useEffect(() => {
 		debouncedFilterLogs()
-	}, [logs, filters, debouncedFilterLogs])
+	}, [filters, debouncedFilterLogs])
+
+	useEffect(() => {
+		return () => {
+			debouncedFilterLogs.cancel()
+		}
+	}, [debouncedFilterLogs])
 
 	const handleUpdateFilters = <K extends keyof Filters>(key: K, value: Filters[K]) => {
 		setFilters((prev) => {
