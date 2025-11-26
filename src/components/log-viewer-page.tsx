@@ -1,6 +1,7 @@
 import { filterLogs } from '@/lib/utils'
 import { generateLogs, type LogEntry } from '@/mock/generateLogs'
-import { useMemo, useRef, useState } from 'react'
+import debounce from 'lodash.debounce'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FiltersPanel } from './filters-panel'
 import { FooterStats } from './footer-stats'
 import { Header } from './header'
@@ -33,10 +34,33 @@ export type UpdateFilterValue = <K extends keyof Filters>(key: K, value: Filters
 
 export function LogViewerPage() {
 	const [logs] = useState<LogEntry[]>(() => generateLogs(100000))
+	const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>([])
 	const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
 	const LogListAPIRef = useRef<LogListAPI>(null)
 
-	const filteredLogs = useMemo(() => filterLogs(logs, filters), [logs, filters])
+	const filterLogsFn = () => {
+		const newFilteredLogs = filterLogs(logs, filters)
+		setFilteredLogs(newFilteredLogs)
+	}
+
+	const filterLogsFnRef = useRef<() => void>(filterLogsFn)
+
+	useEffect(() => {
+		filterLogsFnRef.current = filterLogsFn
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [logs, filters])
+
+	const debouncedFilterLogs = useMemo(() => {
+		const func = () => {
+			console.log('debounced function is called')
+			filterLogsFnRef.current?.()
+		}
+		return debounce(func, 500)
+	}, [])
+
+	useEffect(() => {
+		debouncedFilterLogs()
+	}, [logs, filters, debouncedFilterLogs])
 
 	const handleUpdateFilters = <K extends keyof Filters>(key: K, value: Filters[K]) => {
 		setFilters((prev) => {
