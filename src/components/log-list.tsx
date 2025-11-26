@@ -1,5 +1,6 @@
 import type { LogEntry } from '@/mock/generateLogs'
-import { useImperativeHandle, useRef, type RefObject } from 'react'
+import { memo, useImperativeHandle, type RefObject } from 'react'
+import { List, useListRef, type RowComponentProps } from 'react-window'
 import './log-list.css'
 
 export type LogListAPI = {
@@ -16,38 +17,52 @@ interface Props {
 export function LogList(props: Props) {
 	const { items, apiRef } = props
 
-	const containerRef = useRef<HTMLDivElement>(null)
+	const listRef = useListRef(null)
 
 	useImperativeHandle(
 		apiRef,
 		() => ({
 			scrollToTop: () => {
-				containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+				listRef.current?.scrollToRow({ index: 0, behavior: 'smooth' })
 			},
 			scrollToBottom: () => {
-				containerRef.current?.scrollTo({ top: containerRef.current?.scrollHeight, behavior: 'smooth' })
+				listRef.current?.scrollToRow({ index: items.length - 1, behavior: 'smooth' })
 			},
 			scrollToLineNumber: (index: number) => {
-				const element = document.getElementById(`log-${index}`)
-				if (element) {
-					element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-				}
+				listRef.current?.scrollToRow({ index, behavior: 'smooth' })
 			}
 		}),
-		[]
+		[listRef, items.length]
 	)
 
 	return (
-		<section className='log-viewer-terminal' ref={containerRef}>
-			{items.map((item, index) => (
-				<div
-					key={item.id}
-					id={`log-${index}`}
-					// ref={index === 0 ? firstItemRef : index === items.length - 1 ? lastItemRef : undefined}
-				>
-					{item.timestamp} {item.level} {item.source} | {item.message}
-				</div>
-			))}
+		<section className='log-viewer-terminal'>
+			<List
+				rowComponent={(props) => <LogItem {...props} />}
+				rowCount={items.length}
+				rowHeight={39}
+				rowProps={{ data: items }}
+				listRef={listRef}
+			/>
 		</section>
 	)
 }
+
+type LogItemRowProps = {
+	data: LogEntry[]
+}
+
+type LogItemProps = RowComponentProps & LogItemRowProps
+
+function LogItemComponent(props: LogItemProps) {
+	const { index, style, data } = props
+	const item = data[index]
+
+	return (
+		<div style={style}>
+			{item.timestamp} {item.level} {item.source} | {item.message}
+		</div>
+	)
+}
+
+const LogItem = memo(LogItemComponent)
