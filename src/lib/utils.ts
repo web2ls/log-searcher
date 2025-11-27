@@ -15,16 +15,18 @@ export function filterLogs(logs: LogEntry[], filters: Filters) {
 		.filter((key) => filters.level[key as LogLevel])
 		.map((key) => key as LogLevel)
 
-	if (activeLevels.length === 0 && !isMessageFilterActive) {
+	const isLevelActive = activeLevels.length > 0
+
+	if (!isLevelActive && !isMessageFilterActive) {
 		return logs
 	}
 
 	return logs.filter((log) => {
-		if (!activeLevels.includes(log.level)) {
+		if (isLevelActive && !activeLevels.includes(log.level)) {
 			return false
 		}
 
-		if (!log.message.toLowerCase().includes(filterMessage)) {
+		if (isMessageFilterActive && !log.message.toLowerCase().includes(filterMessage)) {
 			return false
 		}
 
