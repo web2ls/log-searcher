@@ -39,7 +39,8 @@ export function LogViewerPage() {
 	const LogListAPIRef = useRef<LogListAPI>(null)
 
 	const filterLogsFn = useCallback(() => {
-		setFilteredLogs(filterLogs(logs, filters))
+		const result = filterLogs(logs, filters)
+		setFilteredLogs(result)
 	}, [logs, filters])
 
 	const filterLogsFnRef = useRef<() => void>(filterLogsFn)

@@ -1,5 +1,5 @@
 import type { Filters } from '@/components/log-viewer-page'
-import type { LogEntry } from '@/mock/generateLogs'
+import type { LogEntry, LogLevel } from '@/mock/generateLogs'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -8,17 +8,23 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function filterLogs(logs: LogEntry[], filters: Filters) {
+	const filterMessage = filters.message.trim().toLowerCase()
+	const isMessageFilterActive = filterMessage.length > 0
+
+	const activeLevels = Object.keys(filters.level)
+		.filter((key) => filters.level[key as LogLevel])
+		.map((key) => key as LogLevel)
+
+	if (activeLevels.length === 0 && !isMessageFilterActive) {
+		return logs
+	}
+
 	return logs.filter((log) => {
-		if (filters.message.trim() && !log.message.includes(filters.message)) {
+		if (!activeLevels.includes(log.level)) {
 			return false
 		}
 
-		const levels = filters.level
-		const activeLevels = Object.entries(levels)
-			.filter(([, value]) => value)
-			.map(([key]) => key)
-
-		if (activeLevels.length > 0 && !activeLevels.includes(log.level)) {
+		if (!log.message.toLowerCase().includes(filterMessage)) {
 			return false
 		}
 
