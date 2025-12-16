@@ -1,6 +1,6 @@
 import type { LogEntry } from '@/mock/generateLogs'
 import { memo, useImperativeHandle, type RefObject } from 'react'
-import { List, useListRef, type RowComponentProps } from 'react-window'
+import { List, useDynamicRowHeight, useListRef, type RowComponentProps } from 'react-window'
 import './log-list.css'
 
 export type LogListAPI = {
@@ -18,6 +18,10 @@ export function LogList(props: Props) {
 	const { items, apiRef } = props
 
 	const listRef = useListRef(null)
+
+	const rowHeight = useDynamicRowHeight({
+		defaultRowHeight: 39
+	})
 
 	useImperativeHandle(
 		apiRef,
@@ -40,7 +44,7 @@ export function LogList(props: Props) {
 			<List
 				rowComponent={(props) => <LogItem {...props} />}
 				rowCount={items.length}
-				rowHeight={39}
+				rowHeight={rowHeight}
 				rowProps={{ data: items }}
 				listRef={listRef}
 			/>
