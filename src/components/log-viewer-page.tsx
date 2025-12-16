@@ -52,7 +52,7 @@ export function LogViewerPage() {
 	const debouncedFilterLogsFnRef = useRef<ReturnType<typeof debounce> | null>(null)
 
 	useEffect(() => {
-		debouncedFilterLogsFnRef.current = debounce(filterLogsFnRef.current, 500)
+		debouncedFilterLogsFnRef.current = debounce(() => filterLogsFnRef.current?.(), 500)
 
 		return () => {
 			debouncedFilterLogsFnRef.current?.cancel()
