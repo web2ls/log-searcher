@@ -9,6 +9,8 @@ import { LogList, type LogListAPI } from './log-list'
 import './log-viewer-page.css'
 import { Toolbar } from './toolbar'
 
+const logs = generateLogs(100000)
+
 export interface Filters {
 	message: string
 	level: {
@@ -33,15 +35,14 @@ const DEFAULT_FILTERS: Filters = {
 export type UpdateFilterValue = <K extends keyof Filters>(key: K, value: Filters[K]) => void
 
 export function LogViewerPage() {
-	const [logs] = useState<LogEntry[]>(() => generateLogs(100000))
-	const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>([])
+	const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>(logs)
 	const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
 	const LogListAPIRef = useRef<LogListAPI>(null)
 
 	const filterLogsFn = useCallback(() => {
 		const result = filterLogs(logs, filters)
 		setFilteredLogs(result)
-	}, [filters, logs])
+	}, [filters])
 
 	const filterLogsFnRef = useRef(filterLogsFn)
 
@@ -61,7 +62,7 @@ export function LogViewerPage() {
 
 	useEffect(() => {
 		debouncedFilterLogsFnRef.current?.()
-	}, [filters, logs])
+	}, [filters])
 
 	const handleUpdateFilters = <K extends keyof Filters>(key: K, value: Filters[K]) => {
 		setFilters((prev) => {
